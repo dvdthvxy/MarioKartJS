@@ -17,8 +17,11 @@
         <div id="item">
 
         </div>
-        <div id="coins">
-            x0
+        <div class="coins">
+            <div class="coinImg">
+                <img src="assets/coinCounter.png" alt="">
+            </div>
+            <div id="coins">x0</div>
         </div>
     </div>
     <div class="border">
@@ -31,8 +34,6 @@
         let coins
         let checkpoints
         let timer
-        // let.cameraX = -825
-        // let cameraY = 200
         let rotateDeg = 0
         let id = 0
 
@@ -62,11 +63,6 @@
                 this.y = y;
                 this.color = 'transparent';
             }
-            // update() {
-            //     const ctx = game.context;
-            //     ctx.fillStyle = this.color;
-            //     ctx.fillRect(this.x, this.y, this.width, this.height);
-            // }
         }
 
         Wall.prototype.update = function () {
@@ -90,6 +86,7 @@
                 this.speed = 0
                 this.acceleration = 0.1
                 this.topSpeed = 3
+                this.coinsCollected = 0
             }
             update() {
                 const ctx = game.context;
@@ -171,7 +168,10 @@
             }
             collect(coin) {
                 coin.isCollected = true
-                this.topSpeed += 0.25
+                this.topSpeed += 0.1
+                this.coinsCollected += 1
+                const coinDisplay = document.getElementById('coins')
+                coinDisplay.innerHTML = `x${this.coinsCollected}`
             }
             accelerate() {
                 if (this.speed < this.topSpeed) {
@@ -195,13 +195,11 @@
             }
         }
 
-        // class Coin extends Wall {
         class Coin {
-            constructor(x, y, color) {
-                // super()
+            constructor(x, y) {
                 this.width = 5;
                 this.height = 5;
-                this.color = color;
+                this.color = 'yellow';
                 this.x = x;
                 this.y = y;
                 this.isCollected = false;
@@ -279,12 +277,13 @@
             walls.forEach(wall => wall.update())
             coins.forEach(coin => coin.update())
             checkpoints.forEach(checkpoint => checkpoint.update())
+
             walls.forEach(wall => {
                 if (mario.collidesWith(wall)) {
-                    // bounceBackFrom(wall, mario)
                     mario.bounceBackFrom(wall)
                 }
             });
+
             coins.forEach(coin => {
                 if (mario.collidesWith(coin) && !(coin.isCollected)) {
                     mario.collect(coin)
@@ -343,8 +342,13 @@
             new Wall(700, 7, 0, 0),
             new Wall(700, 7, 0, 694)]
 
-            coins = [new Coin(625, 200, 'yellow'),
-            new Coin(650, 200, 'yellow')]
+            coins = [new Coin(623, 175),
+            new Coin(634, 175),
+            new Coin(645, 175),
+            new Coin(612, 98),
+            new Coin(574, 98),
+            new Coin(536, 82),
+            new Coin(450, 82)]
 
             checkpoints = [new Checkpoint(105, 1, 585, 200, 0),
             new Checkpoint(1, 145, 555, 7, 1),
