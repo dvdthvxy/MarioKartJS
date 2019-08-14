@@ -60,15 +60,20 @@
                 this.countdownAudio = document.querySelector(".countdown")
             },
             start() {
+                document.querySelector("button").disabled = 'true';
+                mario.newPos()
+                mario.update()
                 this.beginRaceMusic.play()
                 this.beginRaceMusic.addEventListener("ended", () => {
                     game.countdownAudio.play()
                 })
-                this.interval = setInterval(updateGame, 20);
-                // this.trackMusic.play()
-                window.addEventListener('keydown', handleKeydown)
-                window.addEventListener('keyup', handleKeyUp)
-                document.querySelector("button").disabled = 'true';
+                setTimeout(()=>{
+                    timer = new Timer()
+                    window.addEventListener('keydown', handleKeydown)
+                    window.addEventListener('keyup', handleKeyUp)
+                    this.interval = setInterval(updateGame, 20);
+                    this.trackMusic.play()
+                }, 8000)
             },
             clear() {
                 this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
@@ -428,6 +433,7 @@
                     clearInterval(game.interval)
                     timer.elapsedTime.totalTime = timer.lapTimes.reduce((total, time) => total + time, 0)
                     timer.context.innerHTML = timer.getMinutes(timer.elapsedTime.totalTime) + ":" + ("0" + timer.getSeconds(timer.elapsedTime.totalTime)).slice(-2) + "." + ("0" + timer.getMilliseconds(timer.elapsedTime.totalTime)).slice(-2)
+                    game.finalLapMusic.pause()
                 }
 
                 if (timer.lapTimes.length === 4) {
@@ -460,9 +466,8 @@
         }
 
         function startGame() {
-            game.start()
             mario = new Player(15, 15, 629, 400)
-
+            
             walls = [new Wall(55, 200, 525, 153),
             new Wall(432, 10, 148, 350),
             new Wall(131, 16, 126, 93),
@@ -486,7 +491,7 @@
             new Wall(7, 700, 694, 0),
             new Wall(700, 7, 0, 0),
             new Wall(700, 7, 0, 694)]
-
+            
             coins = [new Coin(623, 175),
             new Coin(634, 175),
             new Coin(645, 175),
@@ -521,7 +526,7 @@
             new Coin(388, 540),
             new Coin(388, 551),
             new Coin(388, 562)]
-
+            
             checkpoints = [new Checkpoint(105, 1, 585, 200, 0),
             new Checkpoint(1, 145, 555, 7, 1),
             new Checkpoint(125, 1, 375, 250, 2),
@@ -535,7 +540,7 @@
             new Checkpoint(1, 150, 352, 530, 10),
             new Checkpoint(105, 1, 585, 530, 11),
             new Checkpoint(105, 1, 585, 382, 12)]
-
+            
             itemBoxes = [new ItemBox(301, 300, itemArray[Math.floor(Math.random() * itemArray.length)]),
             new ItemBox(322, 300, itemArray[Math.floor(Math.random() * itemArray.length)]),
             new ItemBox(350, 300, itemArray[Math.floor(Math.random() * itemArray.length)]),
@@ -546,10 +551,10 @@
             new ItemBox(345, 322, itemArray[Math.floor(Math.random() * itemArray.length)]),
             new ItemBox(323, 332, itemArray[Math.floor(Math.random() * itemArray.length)]),
             new ItemBox(356, 332, itemArray[Math.floor(Math.random() * itemArray.length)])]
-
-            timer = new Timer()
+            
+            game.start()
         }
-
+        
         function handleKeydown(e) {
             game.keys[e.keyCode] = true
         }
