@@ -11,27 +11,35 @@
 
 <body>
     <div id="hud">
-        <div id="timer">
-            1:00
-        </div>
-        <div id="item">
+        <div id="timer"></div>
 
-        </div>
+        <ul id="lapTimes"></ul>
+
+        <div id="item"></div>
+
         <div class="coins">
             <div class="coinImg">
                 <img src="assets/coinCounter.png" alt="">
             </div>
+
             <div id="coins">x0</div>
         </div>
+        <button>START</button>
     </div>
     <div class="border">
         <canvas id="game-screen" data-position="px"></canvas>
     </div>
 
+    <audio class="trackMusic" src="assets/sounds/07_Mario Circuit.mp3"></audio>
+    <audio class="finalLap" src="assets/sounds/08_Mario Circuit (Final Lap).mp3"></audio>
+    <audio class="beginRace" src="assets/sounds/04_Race Fanfare.mp3"></audio>
+    <audio class="countdown" src="assets/sounds/06_Race Start.mp3"></audio>
+
     <script>
         let mario
         let walls
         let coins
+        let itemBoxes
         let checkpoints
         let timer
         let rotateDeg = 0
@@ -39,16 +47,28 @@
 
         const game = {
             canvas: document.getElementById('game-screen'),
-            start() {
+            loadGame() {
                 this.canvas.width = 700;
                 this.canvas.height = 700;
                 this.context = this.canvas.getContext("2d");
-                this.interval = setInterval(updateGame, 20);
                 this.keys = []
                 this.cameraX = -825
-                this.cameraY = 200
+                this.cameraY = -100
+                this.trackMusic = document.querySelector(".trackMusic")
+                this.finalLapMusic = document.querySelector(".finalLap")
+                this.beginRaceMusic = document.querySelector(".beginRace")
+                this.countdownAudio = document.querySelector(".countdown")
+            },
+            start() {
+                this.beginRaceMusic.play()
+                this.beginRaceMusic.addEventListener("ended", () => {
+                    game.countdownAudio.play()
+                })
+                this.interval = setInterval(updateGame, 20);
+                // this.trackMusic.play()
                 window.addEventListener('keydown', handleKeydown)
                 window.addEventListener('keyup', handleKeyUp)
+                document.querySelector("button").disabled = 'true';
             },
             clear() {
                 this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
@@ -73,12 +93,12 @@
 
         // class Player extends Wall {
         class Player {
-            constructor(width, height, img, x, y) {
+            constructor(width, height, x, y) {
                 // super()
                 this.width = width;
                 this.height = height;
                 this.image = new Image()
-                this.image.src = img
+                this.image.src = "assets/mario.png"
                 this.x = x;
                 this.y = y;
                 this.angle = 0
@@ -87,6 +107,7 @@
                 this.acceleration = 0.1
                 this.topSpeed = 3
                 this.coinsCollected = 0
+                this.hasItem = false
             }
             update() {
                 const ctx = game.context;
@@ -117,7 +138,8 @@
                 game.canvas.style.setProperty(`--xPlayer`, this.x + "px");
                 game.canvas.style.setProperty(`--yPlayer`, this.y + "px");
                 game.canvas.style.setProperty(`--xPos`, game.cameraX + "px");
-                game.canvas.style.setProperty(`--yPos`, (game.cameraY - 300) + "px");
+                // game.canvas.style.setProperty(`--yPos`, (game.cameraY - 300) + "px");
+                game.canvas.style.setProperty(`--yPos`, game.cameraY + "px");
                 game.canvas.style.setProperty(`--turn`, (rotateDeg * 180) + "deg");
             }
             collidesWith(otherObj) {
@@ -166,18 +188,26 @@
                     game.cameraY += 1.5
                 }
             }
-            collect(coin) {
-                coin.isCollected = true
-                this.topSpeed += 0.1
-                this.coinsCollected += 1
-                const coinDisplay = document.getElementById('coins')
-                coinDisplay.innerHTML = `x${this.coinsCollected}`
+            collect(item) {
+                if (item instanceof Coin) {
+                    this.topSpeed += 0.05
+                    this.coinsCollected += 1
+                    this.updateCoinCounterDisplay()
+                }
+
+                if (item instanceof ItemBox) {
+                    this.hasItem = true
+                    setTimeout(function () {
+                        mario.item = item.itemInside
+                        console.log(mario.item)
+                        document.documentElement.style.setProperty(`--itemPosX`, mario.item.itemPosX + "px");
+                        document.documentElement.style.setProperty(`--itemPosY`, mario.item.itemPosY + "px");
+                    }, 2000)
+                }
             }
             accelerate() {
                 if (this.speed < this.topSpeed) {
                     this.speed += this.acceleration
-                } else {
-                    this.speed = this.topSpeed
                 }
             }
             turnLeft() {
@@ -188,30 +218,118 @@
             }
             reverse() {
                 if (this.speed > 0) {
-                    this.speed -= 0.05
+                    this.speed -= 0.9
                 } else {
                     this.speed = -0.5
                 }
+            }
+            useItem() {
+                if (this.item instanceof CoinItem) {
+                    this.topSpeed += 0.1
+                    this.coinsCollected += this.item.addCoins()
+                    this.updateCoinCounterDisplay()
+                }
+
+                if (this.item instanceof Mushroom) {
+                    this.speed += this.item.temporarilyBoostSpeed()
+                }
+
+                if (this.item instanceof Star) {
+                    this.savedTopSpeed = this.topSpeed
+                    this.savedAcceleration = this.acceleration
+                    this.topSpeed += this.item.topSpeed
+                    this.acceleration = this.item.acceleration
+                    setTimeout(function () {
+                        mario.topSpeed = mario.savedTopSpeed
+                        mario.acceleration = mario.savedAcceleration
+                    }, this.item.duration)
+                }
+
+                this.hasItem = false
+                this.item = undefined
+                document.documentElement.style.setProperty(`--itemPosX`, -156 + "px");
+                document.documentElement.style.setProperty(`--itemPosY`, -33 + "px");
+            }
+            updateCoinCounterDisplay() {
+                document.getElementById('coins').innerHTML = `x${this.coinsCollected}`
             }
         }
 
         class Coin {
             constructor(x, y) {
-                this.width = 5;
-                this.height = 5;
-                this.color = 'yellow';
                 this.x = x;
                 this.y = y;
                 this.isCollected = false;
             }
-            update() {
-                if (!(this.isCollected)) {
-                    const ctx = game.context;
-                    ctx.fillStyle = this.color;
-                    ctx.fillRect(this.x, this.y, this.width, this.height);
-                }
+        }
+
+        Coin.prototype.width = 5
+        Coin.prototype.height = 5
+        Coin.prototype.image = new Image()
+        Coin.prototype.image.src = "assets/coin.png"
+        Coin.prototype.update = function () {
+            if (!(this.isCollected)) {
+                const ctx = game.context;
+                ctx.drawImage(this.image, this.x, this.y, this.width, this.height)
             }
         }
+
+
+        class ItemBox {
+            constructor(x, y, item) {
+                this.image = new Image()
+                this.x = x;
+                this.y = y;
+                this.isCollected = false;
+                this.itemInside = item
+            }
+            update() {
+                const ctx = game.context;
+                // ctx.save();
+                // ctx.translate(this.x, this.y);
+                // ctx.rotate(270 * (Math.PI / 180))
+                if (!(this.isCollected)) {
+                    this.image.src = "assets/itemBox.png"
+                } else {
+                    this.image.src = "assets/itemBoxCollected.png"
+                }
+                // ctx.drawImage(this.image, this.width / -2, this.height / -2, this.width, this.height)
+                ctx.drawImage(this.image, this.x, this.y, this.width, this.height)
+                // ctx.restore();
+            }
+        }
+
+        ItemBox.prototype.width = 13;
+        ItemBox.prototype.height = 13;
+
+        class CoinItem {
+        }
+
+        CoinItem.prototype.addCoins = function () {
+            return 2
+        }
+        CoinItem.prototype.itemPosX = -22
+        CoinItem.prototype.itemPosY = -33
+
+        class Mushroom {
+        }
+
+        Mushroom.prototype.temporarilyBoostSpeed = function () {
+            return 3
+        }
+        Mushroom.prototype.itemPosX = -88
+        Mushroom.prototype.itemPosY = -33
+
+        class Star {
+        }
+
+        Star.prototype.topSpeed = 1
+        Star.prototype.acceleration = 0.25
+        Star.prototype.duration = 2000
+        Star.prototype.itemPosX = -156
+        Star.prototype.itemPosY = -128
+
+        const itemArray = [new CoinItem(), new Mushroom(), new Star()]
 
         class Checkpoint extends Wall {
             constructor(width, height, x, y, id) {
@@ -272,11 +390,12 @@
             timer.update()
             mario.moveAngle = 0;
             checkInput(game.keys)
-            mario.newPos()
-            mario.update()
             walls.forEach(wall => wall.update())
             coins.forEach(coin => coin.update())
+            itemBoxes.forEach(itemBox => itemBox.update())
             checkpoints.forEach(checkpoint => checkpoint.update())
+            mario.newPos()
+            mario.update()
 
             walls.forEach(wall => {
                 if (mario.collidesWith(wall)) {
@@ -286,7 +405,15 @@
 
             coins.forEach(coin => {
                 if (mario.collidesWith(coin) && !(coin.isCollected)) {
+                    coin.isCollected = true
                     mario.collect(coin)
+                }
+            })
+
+            itemBoxes.forEach(itemBox => {
+                if (mario.collidesWith(itemBox) && !(itemBox.isCollected) && !(mario.hasItem)) {
+                    itemBox.isCollected = true
+                    mario.collect(itemBox)
                 }
             })
 
@@ -297,8 +424,23 @@
             if (checkpoints.every(checkpoint => checkpoint.isPassed)) {
                 resetCheckpoints(checkpoints)
                 timer.lapTimes.push(timer.elapsedTime.currentLapTime)
-                console.log(timer.lapTimes)
+                if (timer.lapTimes.length === 5) {
+                    clearInterval(game.interval)
+                    timer.elapsedTime.totalTime = timer.lapTimes.reduce((total, time) => total + time, 0)
+                    timer.context.innerHTML = timer.getMinutes(timer.elapsedTime.totalTime) + ":" + ("0" + timer.getSeconds(timer.elapsedTime.totalTime)).slice(-2) + "." + ("0" + timer.getMilliseconds(timer.elapsedTime.totalTime)).slice(-2)
+                }
+
+                if (timer.lapTimes.length === 4) {
+                    game.trackMusic.pause()
+                    game.finalLapMusic.play()
+                }
+                const lapTimeHtml = document.getElementById('lapTimes')
+                const li = document.createElement("li")
+                const lapTime = document.createTextNode(`${timer.getMinutes(timer.lapTimes[timer.lapTimes.length - 1])}:${("0" + timer.getSeconds(timer.lapTimes[timer.lapTimes.length - 1])).slice(-2)}.${("0" + timer.getMilliseconds(timer.lapTimes[timer.lapTimes.length - 1])).slice(-2)}`);
+                li.appendChild(lapTime);
+                lapTimeHtml.appendChild(li);
                 timer.startingLapTime = new Date
+
             }
         }
 
@@ -312,11 +454,14 @@
             if (keys && keys[38]) {
                 mario.accelerate()
             }
+            if (keys && keys[32] && mario.hasItem && mario.item) {
+                mario.useItem()
+            }
         }
-        //"assets/snesMario.png"
+
         function startGame() {
             game.start()
-            mario = new Player(15, 15, "assets/snesMario (1).png", 629, 400)
+            mario = new Player(15, 15, 629, 400)
 
             walls = [new Wall(55, 200, 525, 153),
             new Wall(432, 10, 148, 350),
@@ -348,7 +493,34 @@
             new Coin(612, 98),
             new Coin(574, 98),
             new Coin(536, 82),
-            new Coin(450, 82)]
+            new Coin(476, 87),
+            new Coin(487, 98),
+            new Coin(498, 109),
+            new Coin(465, 163),
+            new Coin(301, 54),
+            new Coin(290, 65),
+            new Coin(279, 76),
+            new Coin(202, 362),
+            new Coin(202, 372),
+            new Coin(202, 382),
+            new Coin(224, 377),
+            new Coin(224, 388),
+            new Coin(224, 398),
+            new Coin(246, 366),
+            new Coin(246, 377),
+            new Coin(246, 388),
+            new Coin(268, 377),
+            new Coin(268, 388),
+            new Coin(268, 399),
+            new Coin(289, 362),
+            new Coin(289, 372),
+            new Coin(289, 382),
+            new Coin(465, 416),
+            new Coin(476, 437),
+            new Coin(465, 465),
+            new Coin(388, 540),
+            new Coin(388, 551),
+            new Coin(388, 562)]
 
             checkpoints = [new Checkpoint(105, 1, 585, 200, 0),
             new Checkpoint(1, 145, 555, 7, 1),
@@ -364,6 +536,17 @@
             new Checkpoint(105, 1, 585, 530, 11),
             new Checkpoint(105, 1, 585, 382, 12)]
 
+            itemBoxes = [new ItemBox(301, 300, itemArray[Math.floor(Math.random() * itemArray.length)]),
+            new ItemBox(322, 300, itemArray[Math.floor(Math.random() * itemArray.length)]),
+            new ItemBox(350, 300, itemArray[Math.floor(Math.random() * itemArray.length)]),
+            new ItemBox(367, 300, itemArray[Math.floor(Math.random() * itemArray.length)]),
+            new ItemBox(291, 315, itemArray[Math.floor(Math.random() * itemArray.length)]),
+            new ItemBox(329, 315, itemArray[Math.floor(Math.random() * itemArray.length)]),
+            new ItemBox(275, 326, itemArray[Math.floor(Math.random() * itemArray.length)]),
+            new ItemBox(345, 322, itemArray[Math.floor(Math.random() * itemArray.length)]),
+            new ItemBox(323, 332, itemArray[Math.floor(Math.random() * itemArray.length)]),
+            new ItemBox(356, 332, itemArray[Math.floor(Math.random() * itemArray.length)])]
+
             timer = new Timer()
         }
 
@@ -376,7 +559,8 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            startGame()
+            game.loadGame()
+            document.querySelector("button").addEventListener("click", startGame)
         })
     </script>
 </body>

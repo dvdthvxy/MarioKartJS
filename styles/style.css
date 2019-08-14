@@ -8,10 +8,12 @@ article,aside,details,figcaption,figure,footer,header,hgroup,nav,section,summary
 
 :root {
     --xPos: -825px;
-    --yPos: 200px;
+    --yPos: -100px;
     --xPlayer: 100px;
     --yPlayer: 100px;
     --turn: 0deg;
+    --itemPosX: -156px;
+    --itemPosY: -33px;
 }
 
 body {
@@ -27,20 +29,37 @@ body {
     position: relative;
 }
 
-.hud {
-    position: absolute;
-    top: 0;
-    left: 0;
+#hud {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     width: 100px;
-    height: 100px;
+}
+
+#lapTimes {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+#item {
+    width: 75px;
+    height: 50px;
+    background-image: url('../assets/items.png');
+    background-position: var(--itemPosX) var(--itemPosY);
 }
 
 canvas {
-    background-image: url('../assets/mariocircuit-4.png');
+    background-image: url('../assets/marioMap.png');
     background-repeat: no-repeat;
     background-size: contain;
     transform: translate(var(--xPos), var(--yPos)) scale(3);
-    /* transform: rotateX(75deg) translate(var(--xPlayer), var(--yPlayer)); */
+    /* transform: rotateX(75deg) translate(var(--xPos), var(--yPos)) scale(3); */
+}
+
+.coins {
+    display: flex;
+    align-items: center;
 }
 
 img {
