@@ -34,6 +34,13 @@
     <audio class="finalLap" src="assets/sounds/08_Mario Circuit (Final Lap).mp3"></audio>
     <audio class="beginRace" src="assets/sounds/04_Race Fanfare.mp3"></audio>
     <audio class="countdown" src="assets/sounds/06_Race Start.mp3"></audio>
+    <audio class="invincible" src="assets/sounds/Invincible.mp3"></audio>
+    <audio class="coinSound" src="assets/sounds/coin.wav"></audio>
+    <audio class="itemBox" src="assets/sounds/43_Item Box.mp3"></audio>
+    <audio class="gotItemSound" src="assets/sounds/gotitem.wav"></audio>
+    <audio class="boost" src="assets/sounds/boost.wav"></audio>
+    <audio class="finish" src="assets/sounds/47_Goal!.mp3"></audio>
+    <audio class="victory" src="assets/sounds/25_New Record.mp3"></audio>
 
     <script>
         let mario
@@ -58,16 +65,111 @@
                 this.finalLapMusic = document.querySelector(".finalLap")
                 this.beginRaceMusic = document.querySelector(".beginRace")
                 this.countdownAudio = document.querySelector(".countdown")
+                this.coinSound = document.querySelector(".coinSound")
+                this.invincibleSound = document.querySelector(".invincible")
+                this.boostSound = document.querySelector(".boost")
+                this.itemBoxSound = document.querySelector(".itemBox")
+                this.gotItemSound = document.querySelector(".gotItemSound")
+                this.finishLineSound = document.querySelector(".finish")
+                this.victoryMusic = document.querySelector(".victory")
+
+                mario = new Player(15, 15, 629, 400)
+
+                walls = [new Wall(55, 200, 525, 153),
+                new Wall(432, 10, 148, 350),
+                new Wall(131, 16, 126, 93),
+                new Wall(50, 192, 104, 103),
+                new Wall(25, 140, 503, 219),
+                new Wall(8, 80, 147, 275),
+                new Wall(22, 267, 350, 0),
+                new Wall(431, 18, 0, 420),
+                new Wall(54, 28, 400, 426),
+                new Wall(38, 18, 125, 563),
+                new Wall(38, 18, 147, 552),
+                new Wall(38, 18, 169, 541),
+                new Wall(38, 18, 191, 530),
+                new Wall(38, 18, 213, 519),
+                new Wall(213, 8, 213, 519),
+                new Wall(158, 8, 422, 527),
+                new Wall(8, 180, 573, 355),
+                new Wall(6, 22, 350, 590),
+                new Wall(6, 65, 350, 635),
+                new Wall(7, 700, 0, 0),
+                new Wall(7, 700, 694, 0),
+                new Wall(700, 7, 0, 0),
+                new Wall(700, 7, 0, 694)]
+
+                coins = [new Coin(623, 175),
+                new Coin(634, 175),
+                new Coin(645, 175),
+                new Coin(612, 98),
+                new Coin(574, 98),
+                new Coin(536, 82),
+                new Coin(476, 87),
+                new Coin(487, 98),
+                new Coin(498, 109),
+                new Coin(465, 163),
+                new Coin(301, 54),
+                new Coin(290, 65),
+                new Coin(279, 76),
+                new Coin(202, 362),
+                new Coin(202, 372),
+                new Coin(202, 382),
+                new Coin(224, 377),
+                new Coin(224, 388),
+                new Coin(224, 398),
+                new Coin(246, 366),
+                new Coin(246, 377),
+                new Coin(246, 388),
+                new Coin(268, 377),
+                new Coin(268, 388),
+                new Coin(268, 399),
+                new Coin(289, 362),
+                new Coin(289, 372),
+                new Coin(289, 382),
+                new Coin(465, 416),
+                new Coin(476, 437),
+                new Coin(465, 465),
+                new Coin(388, 540),
+                new Coin(388, 551),
+                new Coin(388, 562)]
+
+                checkpoints = [new Checkpoint(105, 1, 585, 200, 0),
+                new Checkpoint(1, 145, 555, 7, 1),
+                new Checkpoint(125, 1, 375, 250, 2),
+                new Checkpoint(190, 1, 155, 200, 3),
+                new Checkpoint(1, 85, 175, 7, 4),
+                new Checkpoint(90, 1, 10, 200, 5),
+                new Checkpoint(1, 55, 250, 364, 6),
+                new Checkpoint(110, 1, 460, 440, 7),
+                new Checkpoint(1, 75, 250, 440, 8),
+                new Checkpoint(110, 1, 10, 575, 9),
+                new Checkpoint(1, 150, 352, 530, 10),
+                new Checkpoint(105, 1, 585, 530, 11),
+                new Checkpoint(105, 1, 585, 382, 12)]
+
+                itemBoxes = [new ItemBox(301, 300, itemArray[Math.floor(Math.random() * itemArray.length)]),
+                new ItemBox(322, 300, itemArray[Math.floor(Math.random() * itemArray.length)]),
+                new ItemBox(350, 300, itemArray[Math.floor(Math.random() * itemArray.length)]),
+                new ItemBox(367, 300, itemArray[Math.floor(Math.random() * itemArray.length)]),
+                new ItemBox(291, 315, itemArray[Math.floor(Math.random() * itemArray.length)]),
+                new ItemBox(329, 315, itemArray[Math.floor(Math.random() * itemArray.length)]),
+                new ItemBox(275, 326, itemArray[Math.floor(Math.random() * itemArray.length)]),
+                new ItemBox(345, 322, itemArray[Math.floor(Math.random() * itemArray.length)]),
+                new ItemBox(323, 332, itemArray[Math.floor(Math.random() * itemArray.length)]),
+                new ItemBox(356, 332, itemArray[Math.floor(Math.random() * itemArray.length)])]
             },
             start() {
                 document.querySelector("button").disabled = 'true';
-                mario.newPos()
                 mario.update()
                 this.beginRaceMusic.play()
+                // if (this.beginRaceMusic.currentTime) {
+                //     console.log('hello')
+                // }
                 this.beginRaceMusic.addEventListener("ended", () => {
                     game.countdownAudio.play()
                 })
-                setTimeout(()=>{
+                setTimeout(() => {
                     timer = new Timer()
                     window.addEventListener('keydown', handleKeydown)
                     window.addEventListener('keyup', handleKeyUp)
@@ -96,10 +198,8 @@
             ctx.fillRect(this.x, this.y, this.width, this.height);
         }
 
-        // class Player extends Wall {
         class Player {
             constructor(width, height, x, y) {
-                // super()
                 this.width = width;
                 this.height = height;
                 this.image = new Image()
@@ -143,7 +243,6 @@
                 game.canvas.style.setProperty(`--xPlayer`, this.x + "px");
                 game.canvas.style.setProperty(`--yPlayer`, this.y + "px");
                 game.canvas.style.setProperty(`--xPos`, game.cameraX + "px");
-                // game.canvas.style.setProperty(`--yPos`, (game.cameraY - 300) + "px");
                 game.canvas.style.setProperty(`--yPos`, game.cameraY + "px");
                 game.canvas.style.setProperty(`--turn`, (rotateDeg * 180) + "deg");
             }
@@ -198,16 +297,19 @@
                     this.topSpeed += 0.05
                     this.coinsCollected += 1
                     this.updateCoinCounterDisplay()
+                    game.coinSound.currentTime = 0
+                    game.coinSound.play()
                 }
 
                 if (item instanceof ItemBox) {
+                    game.itemBoxSound.play()
                     this.hasItem = true
                     setTimeout(function () {
+                        game.gotItemSound.play()
                         mario.item = item.itemInside
-                        console.log(mario.item)
                         document.documentElement.style.setProperty(`--itemPosX`, mario.item.itemPosX + "px");
                         document.documentElement.style.setProperty(`--itemPosY`, mario.item.itemPosY + "px");
-                    }, 2000)
+                    }, 3500)
                 }
             }
             accelerate() {
@@ -233,10 +335,14 @@
                     this.topSpeed += 0.1
                     this.coinsCollected += this.item.addCoins()
                     this.updateCoinCounterDisplay()
+                    game.coinSound.currentTime = 0
+                    game.coinSound.play()
                 }
 
                 if (this.item instanceof Mushroom) {
                     this.speed += this.item.temporarilyBoostSpeed()
+                    game.boostSound.currentTime = 0
+                    game.boostSound.play()
                 }
 
                 if (this.item instanceof Star) {
@@ -244,10 +350,23 @@
                     this.savedAcceleration = this.acceleration
                     this.topSpeed += this.item.topSpeed
                     this.acceleration = this.item.acceleration
-                    setTimeout(function () {
-                        mario.topSpeed = mario.savedTopSpeed
-                        mario.acceleration = mario.savedAcceleration
-                    }, this.item.duration)
+                    if (game.finalLapMusic.currentTime) {
+                        game.finalLapMusic.pause()
+                        setTimeout(function () {
+                            mario.topSpeed = mario.savedTopSpeed
+                            mario.acceleration = mario.savedAcceleration
+                            game.finalLapMusic.play()
+                        }, this.item.duration)
+                    } else {
+                        game.trackMusic.pause()
+                        setTimeout(function () {
+                            mario.topSpeed = mario.savedTopSpeed
+                            mario.acceleration = mario.savedAcceleration
+                            game.trackMusic.play()
+                        }, this.item.duration)
+                    }
+                    game.invincibleSound.currentTime = 0
+                    game.invincibleSound.play()
                 }
 
                 this.hasItem = false
@@ -290,17 +409,12 @@
             }
             update() {
                 const ctx = game.context;
-                // ctx.save();
-                // ctx.translate(this.x, this.y);
-                // ctx.rotate(270 * (Math.PI / 180))
                 if (!(this.isCollected)) {
                     this.image.src = "assets/itemBox.png"
                 } else {
                     this.image.src = "assets/itemBoxCollected.png"
                 }
-                // ctx.drawImage(this.image, this.width / -2, this.height / -2, this.width, this.height)
                 ctx.drawImage(this.image, this.x, this.y, this.width, this.height)
-                // ctx.restore();
             }
         }
 
@@ -330,7 +444,7 @@
 
         Star.prototype.topSpeed = 1
         Star.prototype.acceleration = 0.25
-        Star.prototype.duration = 2000
+        Star.prototype.duration = 7000
         Star.prototype.itemPosX = -156
         Star.prototype.itemPosY = -128
 
@@ -430,10 +544,11 @@
                 resetCheckpoints(checkpoints)
                 timer.lapTimes.push(timer.elapsedTime.currentLapTime)
                 if (timer.lapTimes.length === 5) {
-                    clearInterval(game.interval)
-                    timer.elapsedTime.totalTime = timer.lapTimes.reduce((total, time) => total + time, 0)
-                    timer.context.innerHTML = timer.getMinutes(timer.elapsedTime.totalTime) + ":" + ("0" + timer.getSeconds(timer.elapsedTime.totalTime)).slice(-2) + "." + ("0" + timer.getMilliseconds(timer.elapsedTime.totalTime)).slice(-2)
-                    game.finalLapMusic.pause()
+                    endGame()
+                    // clearInterval(game.interval)
+                    // timer.elapsedTime.totalTime = timer.lapTimes.reduce((total, time) => total + time, 0)
+                    // timer.context.innerHTML = timer.getMinutes(timer.elapsedTime.totalTime) + ":" + ("0" + timer.getSeconds(timer.elapsedTime.totalTime)).slice(-2) + "." + ("0" + timer.getMilliseconds(timer.elapsedTime.totalTime)).slice(-2)
+                    // game.finalLapMusic.pause()
                 }
 
                 if (timer.lapTimes.length === 4) {
@@ -466,95 +581,20 @@
         }
 
         function startGame() {
-            mario = new Player(15, 15, 629, 400)
-            
-            walls = [new Wall(55, 200, 525, 153),
-            new Wall(432, 10, 148, 350),
-            new Wall(131, 16, 126, 93),
-            new Wall(50, 192, 104, 103),
-            new Wall(25, 140, 503, 219),
-            new Wall(8, 80, 147, 275),
-            new Wall(22, 267, 350, 0),
-            new Wall(431, 18, 0, 420),
-            new Wall(54, 28, 400, 426),
-            new Wall(38, 18, 125, 563),
-            new Wall(38, 18, 147, 552),
-            new Wall(38, 18, 169, 541),
-            new Wall(38, 18, 191, 530),
-            new Wall(38, 18, 213, 519),
-            new Wall(213, 8, 213, 519),
-            new Wall(158, 8, 422, 527),
-            new Wall(8, 180, 573, 355),
-            new Wall(6, 22, 350, 590),
-            new Wall(6, 65, 350, 635),
-            new Wall(7, 700, 0, 0),
-            new Wall(7, 700, 694, 0),
-            new Wall(700, 7, 0, 0),
-            new Wall(700, 7, 0, 694)]
-            
-            coins = [new Coin(623, 175),
-            new Coin(634, 175),
-            new Coin(645, 175),
-            new Coin(612, 98),
-            new Coin(574, 98),
-            new Coin(536, 82),
-            new Coin(476, 87),
-            new Coin(487, 98),
-            new Coin(498, 109),
-            new Coin(465, 163),
-            new Coin(301, 54),
-            new Coin(290, 65),
-            new Coin(279, 76),
-            new Coin(202, 362),
-            new Coin(202, 372),
-            new Coin(202, 382),
-            new Coin(224, 377),
-            new Coin(224, 388),
-            new Coin(224, 398),
-            new Coin(246, 366),
-            new Coin(246, 377),
-            new Coin(246, 388),
-            new Coin(268, 377),
-            new Coin(268, 388),
-            new Coin(268, 399),
-            new Coin(289, 362),
-            new Coin(289, 372),
-            new Coin(289, 382),
-            new Coin(465, 416),
-            new Coin(476, 437),
-            new Coin(465, 465),
-            new Coin(388, 540),
-            new Coin(388, 551),
-            new Coin(388, 562)]
-            
-            checkpoints = [new Checkpoint(105, 1, 585, 200, 0),
-            new Checkpoint(1, 145, 555, 7, 1),
-            new Checkpoint(125, 1, 375, 250, 2),
-            new Checkpoint(190, 1, 155, 200, 3),
-            new Checkpoint(1, 85, 175, 7, 4),
-            new Checkpoint(90, 1, 10, 200, 5),
-            new Checkpoint(1, 55, 250, 364, 6),
-            new Checkpoint(110, 1, 460, 440, 7),
-            new Checkpoint(1, 75, 250, 440, 8),
-            new Checkpoint(110, 1, 10, 575, 9),
-            new Checkpoint(1, 150, 352, 530, 10),
-            new Checkpoint(105, 1, 585, 530, 11),
-            new Checkpoint(105, 1, 585, 382, 12)]
-            
-            itemBoxes = [new ItemBox(301, 300, itemArray[Math.floor(Math.random() * itemArray.length)]),
-            new ItemBox(322, 300, itemArray[Math.floor(Math.random() * itemArray.length)]),
-            new ItemBox(350, 300, itemArray[Math.floor(Math.random() * itemArray.length)]),
-            new ItemBox(367, 300, itemArray[Math.floor(Math.random() * itemArray.length)]),
-            new ItemBox(291, 315, itemArray[Math.floor(Math.random() * itemArray.length)]),
-            new ItemBox(329, 315, itemArray[Math.floor(Math.random() * itemArray.length)]),
-            new ItemBox(275, 326, itemArray[Math.floor(Math.random() * itemArray.length)]),
-            new ItemBox(345, 322, itemArray[Math.floor(Math.random() * itemArray.length)]),
-            new ItemBox(323, 332, itemArray[Math.floor(Math.random() * itemArray.length)]),
-            new ItemBox(356, 332, itemArray[Math.floor(Math.random() * itemArray.length)])]
-            
             game.start()
         }
-        
+
+        function endGame() {
+            clearInterval(game.interval)
+            timer.elapsedTime.totalTime = timer.lapTimes.reduce((total, time) => total + time, 0)
+            timer.context.innerHTML = timer.getMinutes(timer.elapsedTime.totalTime) + ":" + ("0" + timer.getSeconds(timer.elapsedTime.totalTime)).slice(-2) + "." + ("0" + timer.getMilliseconds(timer.elapsedTime.totalTime)).slice(-2)
+            game.finalLapMusic.pause()
+            game.finishLineSound.play()
+            game.finishLineSound.addEventListener("ended", () => {
+                game.victoryMusic.play()
+            })
+        }
+
         function handleKeydown(e) {
             game.keys[e.keyCode] = true
         }
