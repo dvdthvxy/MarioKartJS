@@ -30,6 +30,13 @@
         <canvas id="game-screen" data-position="px"></canvas>
     </div>
 
+    <div class="instructions">
+        <p>UP Arrow - Accelerate</p>
+        <p>LEFT/RIGHT Arrow - Turn</p>
+        <p>BACK Arrow - Brake/Reverse</p>
+        <p>SPACEBAR - Use Item</p>
+    </div>
+
     <audio class="trackMusic" src="assets/sounds/07_Mario Circuit.mp3"></audio>
     <audio class="finalLap" src="assets/sounds/08_Mario Circuit (Final Lap).mp3"></audio>
     <audio class="beginRace" src="assets/sounds/04_Race Fanfare.mp3"></audio>
@@ -41,6 +48,7 @@
     <audio class="boost" src="assets/sounds/boost.wav"></audio>
     <audio class="finish" src="assets/sounds/47_Goal!.mp3"></audio>
     <audio class="victory" src="assets/sounds/25_New Record.mp3"></audio>
+    <audio class="thud"src="assets/sounds/thud1.wav"></audio>
 
     <script>
         let mario
@@ -72,6 +80,7 @@
                 this.gotItemSound = document.querySelector(".gotItemSound")
                 this.finishLineSound = document.querySelector(".finish")
                 this.victoryMusic = document.querySelector(".victory")
+                this.thudSound = document.querySelector(".thud")
 
                 mario = new Player(15, 15, 629, 400)
 
@@ -163,9 +172,6 @@
                 document.querySelector("button").disabled = 'true';
                 mario.update()
                 this.beginRaceMusic.play()
-                // if (this.beginRaceMusic.currentTime) {
-                //     console.log('hello')
-                // }
                 this.beginRaceMusic.addEventListener("ended", () => {
                     game.countdownAudio.play()
                 })
@@ -175,7 +181,7 @@
                     window.addEventListener('keyup', handleKeyUp)
                     this.interval = setInterval(updateGame, 20);
                     this.trackMusic.play()
-                }, 8000)
+                }, 7750)
             },
             clear() {
                 this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
@@ -244,7 +250,8 @@
                 game.canvas.style.setProperty(`--yPlayer`, this.y + "px");
                 game.canvas.style.setProperty(`--xPos`, game.cameraX + "px");
                 game.canvas.style.setProperty(`--yPos`, game.cameraY + "px");
-                game.canvas.style.setProperty(`--turn`, (rotateDeg * 180) + "deg");
+                // game.canvas.style.setProperty(`--yPos`, (game.cameraY + 200) + "px");
+                // game.canvas.style.setProperty(`--turn`, (rotateDeg * 180) + "deg");
             }
             collidesWith(otherObj) {
                 const objLeft = otherObj.x;
@@ -266,30 +273,30 @@
                 const objRight = obj.x + (obj.width);
                 const objTop = obj.y;
                 const objBottom = obj.y + (obj.height);
-                const bounce = 0.5
+                const bounce = 2
 
                 this.speed = 0
                 if (this.top < objBottom && (this.left > objLeft || this.right < objRight) && this.bottom > objBottom) {
                     console.log('top collided')
                     this.y += bounce
-                    game.cameraY -= 1.5
+                    game.cameraY -= bounce * 3
                 }
 
                 if (this.left < objRight && (this.top > objTop && this.bottom < objBottom) && this.left > objLeft) {
                     console.log("left collided")
                     this.x += bounce
-                    game.cameraX -= 1.5
+                    game.cameraX -= bounce * 3
                 }
 
                 if (this.right > objLeft && (this.top > objTop && this.bottom < objBottom) && this.right < objRight) {
                     console.log("right collided")
                     this.x -= bounce
-                    game.cameraX += 1.5
+                    game.cameraX += bounce * 3
                 }
 
                 if (this.bottom > objTop && (this.left > objLeft || this.right < objRight) && this.top < objTop) {
                     this.y -= bounce
-                    game.cameraY += 1.5
+                    game.cameraY += bounce * 3
                 }
             }
             collect(item) {
@@ -304,6 +311,35 @@
                 if (item instanceof ItemBox) {
                     game.itemBoxSound.play()
                     this.hasItem = true
+                    let counter = 0
+
+                    const randomItems = [
+                        { x: "-23px", y: "-36px" }, //coin
+                        { x: "-89px", y: "-36px" }, //mushroom
+                        { x: "-157px", y: "-130px" }, //star
+                        { x: "-23px", y: "-84px" }, //banana
+                        { x: "-91px", y: "-84px" }, //green shell
+                        { x: "-157px", y: "-84px" }, //red shell
+                        { x: "-23px", y: "-130px" }, //feather
+                        { x: "-93px", y: "-130px" } //lighting
+                    ]
+
+                    for (let i = 0; i < 35; i++) {
+                        (function (i) {
+                            setTimeout(function () {
+
+                                if(counter > randomItems.length - 1) {
+                                    counter = 0
+                                }
+
+                                document.documentElement.style.setProperty(`--itemPosX`, randomItems[counter].x);
+                                document.documentElement.style.setProperty(`--itemPosY`, randomItems[counter].y);
+                                counter++
+                                
+                            }, 100 * i);
+                        })(i);
+                    }
+
                     setTimeout(function () {
                         game.gotItemSound.play()
                         mario.item = item.itemInside
@@ -355,14 +391,18 @@
                         setTimeout(function () {
                             mario.topSpeed = mario.savedTopSpeed
                             mario.acceleration = mario.savedAcceleration
-                            game.finalLapMusic.play()
+                            if (!(game.finishLineSound.currentTime)) {
+                                game.finalLapMusic.play()
+                            }
                         }, this.item.duration)
                     } else {
                         game.trackMusic.pause()
                         setTimeout(function () {
                             mario.topSpeed = mario.savedTopSpeed
                             mario.acceleration = mario.savedAcceleration
-                            game.trackMusic.play()
+                            if (!(game.finishLineSound.currentTime)) {
+                                game.trackMusic.play()
+                            }
                         }, this.item.duration)
                     }
                     game.invincibleSound.currentTime = 0
@@ -372,7 +412,7 @@
                 this.hasItem = false
                 this.item = undefined
                 document.documentElement.style.setProperty(`--itemPosX`, -156 + "px");
-                document.documentElement.style.setProperty(`--itemPosY`, -33 + "px");
+                document.documentElement.style.setProperty(`--itemPosY`, -36 + "px");
             }
             updateCoinCounterDisplay() {
                 document.getElementById('coins').innerHTML = `x${this.coinsCollected}`
@@ -427,8 +467,8 @@
         CoinItem.prototype.addCoins = function () {
             return 2
         }
-        CoinItem.prototype.itemPosX = -22
-        CoinItem.prototype.itemPosY = -33
+        CoinItem.prototype.itemPosX = -23
+        CoinItem.prototype.itemPosY = -36
 
         class Mushroom {
         }
@@ -436,8 +476,8 @@
         Mushroom.prototype.temporarilyBoostSpeed = function () {
             return 3
         }
-        Mushroom.prototype.itemPosX = -88
-        Mushroom.prototype.itemPosY = -33
+        Mushroom.prototype.itemPosX = -89
+        Mushroom.prototype.itemPosY = -36
 
         class Star {
         }
@@ -445,8 +485,8 @@
         Star.prototype.topSpeed = 1
         Star.prototype.acceleration = 0.25
         Star.prototype.duration = 7000
-        Star.prototype.itemPosX = -156
-        Star.prototype.itemPosY = -128
+        Star.prototype.itemPosX = -157
+        Star.prototype.itemPosY = -130
 
         const itemArray = [new CoinItem(), new Mushroom(), new Star()]
 
@@ -518,6 +558,8 @@
 
             walls.forEach(wall => {
                 if (mario.collidesWith(wall)) {
+                    game.thudSound.currentTime = 0
+                    game.thudSound.play()
                     mario.bounceBackFrom(wall)
                 }
             });
@@ -545,10 +587,6 @@
                 timer.lapTimes.push(timer.elapsedTime.currentLapTime)
                 if (timer.lapTimes.length === 5) {
                     endGame()
-                    // clearInterval(game.interval)
-                    // timer.elapsedTime.totalTime = timer.lapTimes.reduce((total, time) => total + time, 0)
-                    // timer.context.innerHTML = timer.getMinutes(timer.elapsedTime.totalTime) + ":" + ("0" + timer.getSeconds(timer.elapsedTime.totalTime)).slice(-2) + "." + ("0" + timer.getMilliseconds(timer.elapsedTime.totalTime)).slice(-2)
-                    // game.finalLapMusic.pause()
                 }
 
                 if (timer.lapTimes.length === 4) {
@@ -588,7 +626,9 @@
             clearInterval(game.interval)
             timer.elapsedTime.totalTime = timer.lapTimes.reduce((total, time) => total + time, 0)
             timer.context.innerHTML = timer.getMinutes(timer.elapsedTime.totalTime) + ":" + ("0" + timer.getSeconds(timer.elapsedTime.totalTime)).slice(-2) + "." + ("0" + timer.getMilliseconds(timer.elapsedTime.totalTime)).slice(-2)
+            game.trackMusic.pause()
             game.finalLapMusic.pause()
+            game.invincibleSound.pause()
             game.finishLineSound.play()
             game.finishLineSound.addEventListener("ended", () => {
                 game.victoryMusic.play()
