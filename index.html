@@ -11,19 +11,19 @@
 
 <body>
     <div id="hud">
-        <div id="timer"></div>
+        <!-- <div id="timer"></div> -->
 
-        <ul id="lapTimes"></ul>
+        <!-- <ul id="lapTimes"></ul> -->
 
-        <div id="item"></div>
+        <!-- <div id="item"></div> -->
 
-        <div class="coins">
+        <!-- <div class="coins">
             <div class="coinImg">
                 <img src="assets/coinCounter.png" alt="">
             </div>
 
             <div id="coins">x0</div>
-        </div>
+        </div> -->
         <div class="instructions">
             <div class="questionBlock"></div>
             <p>Instructions</p>
@@ -32,6 +32,15 @@
     <div class="border">
         <canvas id="game-screen" data-position="px"></canvas>
         <div id="titleScreen"></div>
+        <div id="item"></div>
+        <div id="timer"></div>
+        <div class="coins">
+            <div class="coinImg">
+                <img src="assets/coinCounter.png" alt="">
+            </div>
+        
+            <div id="coins">&nbsp; x0</div>
+        </div>
     </div>
 
     <audio class="trackMusic" src="assets/sounds/07_Mario Circuit.mp3"></audio>
@@ -424,11 +433,11 @@
 
                 this.hasItem = false
                 this.item = undefined
-                document.documentElement.style.setProperty(`--itemPosX`, -156 + "px");
+                document.documentElement.style.setProperty(`--itemPosX`, -157 + "px");
                 document.documentElement.style.setProperty(`--itemPosY`, -36 + "px");
             }
             updateCoinCounterDisplay() {
-                document.getElementById('coins').innerHTML = `x${this.coinsCollected}`
+                document.getElementById('coins').innerHTML = `&nbsp; x${this.coinsCollected}`
             }
         }
 
@@ -681,11 +690,11 @@
                     game.finalLapMusic.play()
                 }
 
-                const lapTimeHtml = document.getElementById('lapTimes')
-                const li = document.createElement("li")
-                const lapTime = document.createTextNode(`${timer.getMinutes(timer.lapTimes[timer.lapTimes.length - 1])}:${("0" + timer.getSeconds(timer.lapTimes[timer.lapTimes.length - 1])).slice(-2)}.${("0" + timer.getMilliseconds(timer.lapTimes[timer.lapTimes.length - 1])).slice(-2)}`);
-                li.appendChild(lapTime);
-                lapTimeHtml.appendChild(li);
+                // const lapTimeHtml = document.getElementById('lapTimes')
+                // const li = document.createElement("li")
+                // const lapTime = document.createTextNode(`${timer.getMinutes(timer.lapTimes[timer.lapTimes.length - 1])}:${("0" + timer.getSeconds(timer.lapTimes[timer.lapTimes.length - 1])).slice(-2)}.${("0" + timer.getMilliseconds(timer.lapTimes[timer.lapTimes.length - 1])).slice(-2)}`);
+                // li.appendChild(lapTime);
+                // lapTimeHtml.appendChild(li);
                 timer.startingLapTime = new Date
 
             }
@@ -713,8 +722,8 @@
 
         function endGame() {
             clearInterval(game.interval)
-            timer.elapsedTime.totalTime = timer.lapTimes.reduce((total, time) => total + time, 0)
-            timer.context.innerHTML = timer.getMinutes(timer.elapsedTime.totalTime) + ":" + ("0" + timer.getSeconds(timer.elapsedTime.totalTime)).slice(-2) + "." + ("0" + timer.getMilliseconds(timer.elapsedTime.totalTime)).slice(-2)
+            // timer.elapsedTime.totalTime = timer.lapTimes.reduce((total, time) => total + time, 0)
+            // timer.context.innerHTML = timer.getMinutes(timer.elapsedTime.totalTime) + ":" + ("0" + timer.getSeconds(timer.elapsedTime.totalTime)).slice(-2) + "." + ("0" + timer.getMilliseconds(timer.elapsedTime.totalTime)).slice(-2)
             game.trackMusic.pause()
             game.finalLapMusic.pause()
             game.invincibleSound.pause()
