@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <link rel="stylesheet" href="styles/style.css">
-    <title>Document</title>
+    <title>Mario Kart JS</title>
 </head>
 
 <body>
@@ -24,19 +24,15 @@
 
             <div id="coins">x0</div>
         </div>
-        <button>START</button>
+        <div class="instructions">
+            <div class="questionBlock"></div>
+            <p>Instructions</p>
+        </div>
     </div>
     <div class="border">
         <canvas id="game-screen" data-position="px"></canvas>
+        <div id="titleScreen"></div>
     </div>
-
-    <!-- <div class="instructions">
-        <p>UP Arrow - Accelerate</p>
-        <p>LEFT/RIGHT Arrow - Turn</p>
-        <p>BACK Arrow - Brake/Reverse</p>
-        <p>SPACEBAR - Use Item</p>
-        <p>Turn on your sound before you start</p>
-    </div> -->
 
     <audio class="trackMusic" src="assets/sounds/07_Mario Circuit.mp3"></audio>
     <audio class="finalLap" src="assets/sounds/08_Mario Circuit (Final Lap).mp3"></audio>
@@ -50,6 +46,8 @@
     <audio class="finish" src="assets/sounds/47_Goal!.mp3"></audio>
     <audio class="victory" src="assets/sounds/25_New Record.mp3"></audio>
     <audio class="thud" src="assets/sounds/thud1.wav"></audio>
+
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
 
     <script>
         let mario
@@ -69,7 +67,6 @@
                 this.canvas.width = 700;
                 this.canvas.height = 700;
                 this.context = this.canvas.getContext("2d");
-                // this.context.imageSmoothingEnabled = false;
                 this.keys = []
                 this.cameraX = -825
                 this.cameraY = -100
@@ -175,7 +172,6 @@
                 new ItemBox(356, 332, itemArray[Math.floor(Math.random() * itemArray.length)])]
             },
             start() {
-                document.querySelector("button").disabled = 'true';
                 mario.update()
                 this.beginRaceMusic.play()
                 this.beginRaceMusic.addEventListener("ended", () => {
@@ -712,6 +708,7 @@
 
         function startGame() {
             game.start()
+            document.getElementById("titleScreen").style.display = "none";
         }
 
         function endGame() {
@@ -737,7 +734,10 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             game.loadGame()
-            document.querySelector("button").addEventListener("click", startGame)
+            document.querySelector("#titleScreen").addEventListener("click", startGame)
+            document.querySelector(".questionBlock").addEventListener("click", e => {
+                swal("How to Play", "UP Arrow - Accelerate\nLEFT / RIGHT Arrow - Turn\nBACK Arrow - Brake/Reverse\nSPACEBAR - Use Item\n\nTurn on your sound!");
+            })
         })
     </script>
 </body>
