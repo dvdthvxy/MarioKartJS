@@ -9,8 +9,8 @@ article,aside,details,figcaption,figure,footer,header,hgroup,nav,section,summary
 :root {
     --xPos: -825px;
     --yPos: -100px;
-    --xPlayer: 100px;
-    --yPlayer: 100px;
+    --xPlayer: 629px;
+    --yPlayer: 400px;
     --turn: 0deg;
     --itemPosX: -156px;
     --itemPosY: -36px;
@@ -20,6 +20,12 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
+    /* background-color: black; */
+    /* color: aliceblue; */
+    background-image: url("../assets/hills.png");
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
 }
 
 .border {
@@ -27,6 +33,8 @@ body {
     overflow: hidden;
     background-color: burlywood;
     position: relative;
+    border: 5px solid aliceblue;
+    border-radius: 5px;
 }
 
 #hud {
@@ -54,7 +62,6 @@ canvas {
     background-repeat: no-repeat;
     background-size: contain;
     transform: translate(var(--xPos), var(--yPos)) scale(3);
-    /* transform: rotateX(75deg) translate(var(--xPos), var(--yPos)) scale(3); */
 }
 
 .coins {

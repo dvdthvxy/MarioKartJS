@@ -5,8 +5,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <script>LUX = (function () { var a = ("undefined" !== typeof (LUX) && "undefined" !== typeof (LUX.gaMarks) ? LUX.gaMarks : []); var d = ("undefined" !== typeof (LUX) && "undefined" !== typeof (LUX.gaMeasures) ? LUX.gaMeasures : []); var j = "LUX_start"; var k = window.performance; var l = ("undefined" !== typeof (LUX) && LUX.ns ? LUX.ns : (Date.now ? Date.now() : +(new Date()))); if (k && k.timing && k.timing.navigationStart) { l = k.timing.navigationStart } function f() { if (k && k.now) { return k.now() } var o = Date.now ? Date.now() : +(new Date()); return o - l } function b(n) { if (k) { if (k.mark) { return k.mark(n) } else { if (k.webkitMark) { return k.webkitMark(n) } } } a.push({ name: n, entryType: "mark", startTime: f(), duration: 0 }); return } function m(p, t, n) { if ("undefined" === typeof (t) && h(j)) { t = j } if (k) { if (k.measure) { if (t) { if (n) { return k.measure(p, t, n) } else { return k.measure(p, t) } } else { return k.measure(p) } } else { if (k.webkitMeasure) { return k.webkitMeasure(p, t, n) } } } var r = 0, o = f(); if (t) { var s = h(t); if (s) { r = s.startTime } else { if (k && k.timing && k.timing[t]) { r = k.timing[t] - k.timing.navigationStart } else { return } } } if (n) { var q = h(n); if (q) { o = q.startTime } else { if (k && k.timing && k.timing[n]) { o = k.timing[n] - k.timing.navigationStart } else { return } } } d.push({ name: p, entryType: "measure", startTime: r, duration: (o - r) }); return } function h(n) { return c(n, g()) } function c(p, o) { for (i = o.length - 1; i >= 0; i--) { var n = o[i]; if (p === n.name) { return n } } return undefined } function g() { if (k) { if (k.getEntriesByType) { return k.getEntriesByType("mark") } else { if (k.webkitGetEntriesByType) { return k.webkitGetEntriesByType("mark") } } } return a } return { mark: b, measure: m, gaMarks: a, gaMeasures: d } })(); LUX.ns = (Date.now ? Date.now() : +(new Date())); LUX.ac = []; LUX.cmd = function (a) { LUX.ac.push(a) }; LUX.init = function () { LUX.cmd(["init"]) }; LUX.send = function () { LUX.cmd(["send"]) }; LUX.addData = function (a, b) { LUX.cmd(["addData", a, b]) }; LUX_ae = []; window.addEventListener("error", function (a) { LUX_ae.push(a) }); LUX_al = []; if ("function" === typeof (PerformanceObserver)) { var LongTaskObserver = new PerformanceObserver(function (c) { var b = c.getEntries(); for (var a = 0; a < b.length; a++) { var d = b[a]; LUX_al.push(d) } }); try { LongTaskObserver.observe({ entryTypes: ["longtask"], buffered: true }) } catch (e) { } };</script>
-    <script src="https://cdn.speedcurve.com/js/lux.js?id=381227030" async defer crossorigin="anonymous"></script>
     <link rel="stylesheet" href="styles/style.css">
     <title>Document</title>
 </head>
@@ -32,13 +30,13 @@
         <canvas id="game-screen" data-position="px"></canvas>
     </div>
 
-    <div class="instructions">
+    <!-- <div class="instructions">
         <p>UP Arrow - Accelerate</p>
         <p>LEFT/RIGHT Arrow - Turn</p>
         <p>BACK Arrow - Brake/Reverse</p>
         <p>SPACEBAR - Use Item</p>
         <p>Turn on your sound before you start</p>
-    </div>
+    </div> -->
 
     <audio class="trackMusic" src="assets/sounds/07_Mario Circuit.mp3"></audio>
     <audio class="finalLap" src="assets/sounds/08_Mario Circuit (Final Lap).mp3"></audio>
@@ -51,7 +49,7 @@
     <audio class="boost" src="assets/sounds/boost.wav"></audio>
     <audio class="finish" src="assets/sounds/47_Goal!.mp3"></audio>
     <audio class="victory" src="assets/sounds/25_New Record.mp3"></audio>
-    <audio class="thud"src="assets/sounds/thud1.wav"></audio>
+    <audio class="thud" src="assets/sounds/thud1.wav"></audio>
 
     <script>
         let mario
@@ -63,12 +61,15 @@
         let rotateDeg = 0
         let id = 0
 
+        let lakitu
+
         const game = {
             canvas: document.getElementById('game-screen'),
             loadGame() {
                 this.canvas.width = 700;
                 this.canvas.height = 700;
                 this.context = this.canvas.getContext("2d");
+                // this.context.imageSmoothingEnabled = false;
                 this.keys = []
                 this.cameraX = -825
                 this.cameraY = -100
@@ -86,6 +87,8 @@
                 this.thudSound = document.querySelector(".thud")
 
                 mario = new Player(15, 15, 629, 400)
+
+                lakitu = new Lakitu()
 
                 walls = [new Wall(55, 200, 525, 153),
                 new Wall(432, 10, 148, 350),
@@ -177,7 +180,18 @@
                 this.beginRaceMusic.play()
                 this.beginRaceMusic.addEventListener("ended", () => {
                     game.countdownAudio.play()
+                    lakitu.draw()
                 })
+                setTimeout(() => {
+                    lakitu.ready()
+                }, 5500)
+                setTimeout(() => {
+                    lakitu.set()
+                }, 6550)
+                setTimeout(() => {
+                    lakitu.go()
+                }, 7700)
+                
                 setTimeout(() => {
                     timer = new Timer()
                     window.addEventListener('keydown', handleKeydown)
@@ -331,14 +345,14 @@
                         (function (i) {
                             setTimeout(function () {
 
-                                if(counter > randomItems.length - 1) {
+                                if (counter > randomItems.length - 1) {
                                     counter = 0
                                 }
 
                                 document.documentElement.style.setProperty(`--itemPosX`, randomItems[counter].x);
                                 document.documentElement.style.setProperty(`--itemPosY`, randomItems[counter].y);
                                 counter++
-                                
+
                             }, 100 * i);
                         })(i);
                     }
@@ -419,6 +433,78 @@
             }
             updateCoinCounterDisplay() {
                 document.getElementById('coins').innerHTML = `x${this.coinsCollected}`
+            }
+        }
+
+        class Lakitu {
+            constructor() {
+                this.lakitu = new Image()
+                this.lakitu.src = "assets/lakitu.png"
+                this.raceLight = new Image()
+                this.raceLight.src = "assets/lakitu.png"
+                this.sign = new Image()
+                this.sign.src = "assets/lakitu.png"
+                this.visible = false;
+            }
+            draw() {
+                const ctx = game.context;
+                ctx.drawImage(this.lakitu, 0, 33, 33, 33, mario.x - 15, mario.y - 45, 30, 30)
+                ctx.drawImage(this.raceLight, 158, 51, 8, 8, mario.x - 15, mario.y - 30, 6, 6)
+                ctx.drawImage(this.raceLight, 158, 51, 8, 8, mario.x - 15, mario.y - 24, 6, 6)
+                ctx.drawImage(this.raceLight, 149, 51, 8, 8, mario.x - 15, mario.y - 18, 6, 6)
+            }
+            ready() {
+                const ctx = game.context;
+                ctx.drawImage(this.raceLight, 158, 60, 8, 8, mario.x - 15, mario.y - 30, 6, 6)
+            }
+            set() {
+                const ctx = game.context;
+                ctx.drawImage(this.raceLight, 158, 60, 8, 8, mario.x - 15, mario.y - 24, 6, 6)
+            }
+            go() {
+                const ctx = game.context;
+                ctx.drawImage(this.lakitu, 42, 33, 34, 34, mario.x - 14, mario.y - 45, 30, 30)
+                ctx.drawImage(this.raceLight, 149, 60, 8, 8, mario.x - 15, mario.y - 18, 6, 6)
+            }
+            lap() {
+                const ctx = game.context;
+                ctx.drawImage(this.lakitu, 0, 70, 33, 33, mario.x - 15, mario.y - 45, 30, 30)
+            }
+            signLap2() {
+                const ctx = game.context;
+                ctx.drawImage(this.sign, 116, 33, 25, 18, mario.x - 23, mario.y - 46, 25, 18)
+            }
+            signLap3() {
+                const ctx = game.context;
+                ctx.drawImage(this.sign, 140, 33, 25, 18, mario.x - 24, mario.y - 46, 25, 18)
+            }
+            signLap4() {
+                const ctx = game.context;
+                ctx.drawImage(this.sign, 165, 33, 25, 18, mario.x - 24, mario.y - 46, 25, 18)
+            }
+            signFinalLap() {
+                const ctx = game.context;
+                ctx.drawImage(this.sign, 120, 50, 25, 20, mario.x - 24, mario.y - 46, 25, 20)
+            }
+            update(timer) {
+                if (this.visible) {
+                    this.lap()
+                    if (timer.lapTimes.length === 1) {
+                        this.signLap2()
+                    }
+                    if (timer.lapTimes.length === 2) {
+                        this.signLap3()
+                    }
+                    if (timer.lapTimes.length === 3) {
+                        this.signLap4()
+                    }
+                    if (timer.lapTimes.length === 4) {
+                        this.signFinalLap()
+                    }
+                    setTimeout(function() {
+                        lakitu.visible = false;
+                    }, 1500)
+                }
             }
         }
 
@@ -558,6 +644,7 @@
             checkpoints.forEach(checkpoint => checkpoint.update())
             mario.newPos()
             mario.update()
+            lakitu.update(timer)
 
             walls.forEach(wall => {
                 if (mario.collidesWith(wall)) {
@@ -587,6 +674,7 @@
 
             if (checkpoints.every(checkpoint => checkpoint.isPassed)) {
                 resetCheckpoints(checkpoints)
+                lakitu.visible = true;
                 timer.lapTimes.push(timer.elapsedTime.currentLapTime)
                 if (timer.lapTimes.length === 5) {
                     endGame()
@@ -596,6 +684,7 @@
                     game.trackMusic.pause()
                     game.finalLapMusic.play()
                 }
+
                 const lapTimeHtml = document.getElementById('lapTimes')
                 const li = document.createElement("li")
                 const lapTime = document.createTextNode(`${timer.getMinutes(timer.lapTimes[timer.lapTimes.length - 1])}:${("0" + timer.getSeconds(timer.lapTimes[timer.lapTimes.length - 1])).slice(-2)}.${("0" + timer.getMilliseconds(timer.lapTimes[timer.lapTimes.length - 1])).slice(-2)}`);
